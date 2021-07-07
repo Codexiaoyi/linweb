@@ -1,7 +1,7 @@
 package context
 
 import (
-	"lingo/interfaces"
+	"linweb/interfaces"
 	"net/http"
 )
 

@@ -1,15 +1,14 @@
 package main
 
 import (
-	"lingo"
-	"lingo/interfaces"
+	"linweb/interfaces"
 	"net/http"
 )
 
 func main() {
-	r := lingo.New()
+	r := linweb.New()
 	r.GET("/", func(c interfaces.IContext) {
-		c.Response().HTML(http.StatusOK, "<h1>Hello Lingo</h1>")
+		c.Response().HTML(http.StatusOK, "<h1>Hello linweb</h1>")
 	})
 	r.GET("/hello", func(c interfaces.IContext) {
 		// expect /hello?name=lingo

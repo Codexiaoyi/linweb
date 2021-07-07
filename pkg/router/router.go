@@ -1,7 +1,7 @@
 package router
 
 import (
-	"lingo/interfaces"
+	"linweb/interfaces"
 	"log"
 	"net/http"
 )
