@@ -1,4 +1,4 @@
-package lingo
+package linweb
 
 import (
 	"linweb/interfaces"

@@ -1,8 +1,12 @@
 package interfaces
 
 type IContext interface {
+	//set params in url
+	SetParams(map[string]string)
 	Request() IRequest
 	Response() IResponse
+	//get url param
+	Param(string) string
 }
 
 // Get request data in *http.Request
