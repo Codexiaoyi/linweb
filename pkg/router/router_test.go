@@ -1,13 +1,14 @@
 package router
 
 import (
+	"linweb/interfaces"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func newTestRouter() *Router {
-	r := NewRouter()
+	r := &Router{root: make(map[string]*node), handlers: make(map[string]interfaces.HandlerFunc)}
 	r.addRoute("GET", "/", nil)
 	r.addRoute("GET", "/hello/:name", nil)
 	r.addRoute("GET", "/hello/b/c", nil)

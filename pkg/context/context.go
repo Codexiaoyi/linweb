@@ -12,7 +12,7 @@ type Context struct {
 	params   map[string]string
 }
 
-func NewContext(w http.ResponseWriter, req *http.Request) *Context {
+func NewContext(w http.ResponseWriter, req *http.Request) interfaces.IContext {
 	return &Context{
 		response: newResponse(w),
 		request:  newRequest(req),

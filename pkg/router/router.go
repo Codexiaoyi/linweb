@@ -11,7 +11,7 @@ type Router struct {
 	handlers map[string]interfaces.HandlerFunc
 }
 
-func NewRouter() *Router {
+func NewRouter() interfaces.IRouter {
 	return &Router{root: make(map[string]*node), handlers: make(map[string]interfaces.HandlerFunc)}
 }
 
@@ -42,17 +42,6 @@ func (r *Router) addRoute(method string, url string, handler interfaces.HandlerF
 	r.handlers[key] = handler
 }
 
-func (r *Router) Handle(c interfaces.IContext) {
-	n, params := r.getRoute(c.Request().Method(), c.Request().Path())
-	if n != nil {
-		c.SetParams(params)
-		key := c.Request().Method() + "-" + c.Request().Path()
-		r.handlers[key](c)
-	} else {
-		c.Response().String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Request().Path())
-	}
-}
-
 func (r *Router) getRoute(method string, path string) (*node, map[string]string) {
 	searchParts := parsePattern(path)
 	params := make(map[string]string)
@@ -81,10 +70,29 @@ func (r *Router) getRoute(method string, path string) (*node, map[string]string)
 	return nil, nil
 }
 
+func (r *Router) Handle(c interfaces.IContext) {
+	n, params := r.getRoute(c.Request().Method(), c.Request().Path())
+	if n != nil {
+		c.SetParams(params)
+		key := c.Request().Method() + "-" + c.Request().Path()
+		r.handlers[key](c)
+	} else {
+		c.Response().String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Request().Path())
+	}
+}
+
 func (r *Router) Get(url string, handler interfaces.HandlerFunc) {
 	r.addRoute("GET", url, handler)
 }
 
 func (r *Router) Post(url string, handler interfaces.HandlerFunc) {
 	r.addRoute("POST", url, handler)
+}
+
+func (r *Router) Delete(url string, handler interfaces.HandlerFunc) {
+	r.addRoute("DELETE", url, handler)
+}
+
+func (r *Router) Put(url string, handler interfaces.HandlerFunc) {
+	r.addRoute("PUT", url, handler)
 }

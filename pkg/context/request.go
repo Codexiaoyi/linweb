@@ -1,12 +1,15 @@
 package context
 
-import "net/http"
+import (
+	"linweb/interfaces"
+	"net/http"
+)
 
 type Request struct {
 	req *http.Request
 }
 
-func newRequest(req *http.Request) *Request {
+func newRequest(req *http.Request) interfaces.IRequest {
 	return &Request{req: req}
 }
 

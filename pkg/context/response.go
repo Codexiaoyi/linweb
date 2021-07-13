@@ -3,6 +3,7 @@ package context
 import (
 	"encoding/json"
 	"fmt"
+	"linweb/interfaces"
 	"net/http"
 )
 
@@ -10,7 +11,7 @@ type Response struct {
 	response http.ResponseWriter
 }
 
-func newResponse(res http.ResponseWriter) *Response {
+func newResponse(res http.ResponseWriter) interfaces.IResponse {
 	return &Response{response: res}
 }
 
