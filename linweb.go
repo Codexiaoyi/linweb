@@ -15,12 +15,8 @@ func New() *Linweb {
 	return &Linweb{router: router.NewRouter()}
 }
 
-func (linweb *Linweb) GET(part string, handler interfaces.HandlerFunc) {
-	linweb.router.Get(part, handler)
-}
-
-func (linweb *Linweb) POST(part string, handler interfaces.HandlerFunc) {
-	linweb.router.Post(part, handler)
+func (linweb *Linweb) AddControllers(obj ...interface{}) {
+	linweb.router.AddControllers(obj)
 }
 
 func (linweb *Linweb) Run(addr string) error {

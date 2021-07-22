@@ -1,18 +1,20 @@
 package router
 
 import (
+	"encoding/json"
 	"linweb/interfaces"
 	"net/http"
+	"reflect"
 	"strings"
 )
 
 type Router struct {
-	root     map[string]*node
-	handlers map[string]interfaces.HandlerFunc
+	root     map[MethodType]*node
+	handlers map[string]*Function
 }
 
 func NewRouter() interfaces.IRouter {
-	return &Router{root: make(map[string]*node), handlers: make(map[string]interfaces.HandlerFunc)}
+	return &Router{root: make(map[MethodType]*node), handlers: make(map[string]*Function)}
 }
 
 func parsePattern(pattern string) []string {
@@ -30,10 +32,16 @@ func parsePattern(pattern string) []string {
 	return parts
 }
 
-func (r *Router) addRoute(method string, url string, handler interfaces.HandlerFunc) {
-	parts := parsePattern(url)
+func (r *Router) AddControllers(controllers []interface{}) {
+	parser := NewParser(controllers)
+	for _, f := range parser.Funcs {
+		r.addRoute(f.Method, f.Url, f)
+	}
+}
 
-	key := method + "-" + url
+func (r *Router) addRoute(method MethodType, url string, handler *Function) {
+	parts := parsePattern(url)
+	key := getMethod(method) + "-" + url
 	_, ok := r.root[method]
 	if !ok {
 		r.root[method] = &node{}
@@ -42,7 +50,7 @@ func (r *Router) addRoute(method string, url string, handler interfaces.HandlerF
 	r.handlers[key] = handler
 }
 
-func (r *Router) getRoute(method string, path string) (*node, map[string]string) {
+func (r *Router) getRoute(method MethodType, path string) (*node, map[string]string) {
 	searchParts := parsePattern(path)
 	params := make(map[string]string)
 	root, ok := r.root[method]
@@ -71,28 +79,44 @@ func (r *Router) getRoute(method string, path string) (*node, map[string]string)
 }
 
 func (r *Router) Handle(c interfaces.IContext) {
-	n, params := r.getRoute(c.Request().Method(), c.Request().Path())
+	n, params := r.getRoute(getMethodType(c.Request().Method()), c.Request().Path())
 	if n != nil {
+		// set the params of url to the context.
 		c.SetParams(params)
-		key := c.Request().Method() + "-" + c.Request().Path()
-		r.handlers[key](c)
-	} else {
-		c.Response().String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Request().Path())
+		key := c.Request().Method() + "-" + n.url
+		// map all route fuction to get the function info.
+		handler := r.handlers[key]
+		if handler != nil {
+			// call controller's method.
+			if !handler.Dto.IsValid() {
+				handler.Recv.MethodByName(handler.Name).Call([]reflect.Value{reflect.ValueOf(c)})
+			} else {
+				// parse request body to map to the dto.
+				parseJson(c.Request().Body(), handler.Dto)
+				handler.Recv.MethodByName(handler.Name).Call([]reflect.Value{reflect.ValueOf(c), handler.Dto})
+			}
+			return
+		}
 	}
+	// not has exists node in the trie, return 404.
+	c.Response().String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Request().Path())
 }
 
-func (r *Router) Get(url string, handler interfaces.HandlerFunc) {
-	r.addRoute("GET", url, handler)
-}
-
-func (r *Router) Post(url string, handler interfaces.HandlerFunc) {
-	r.addRoute("POST", url, handler)
-}
-
-func (r *Router) Delete(url string, handler interfaces.HandlerFunc) {
-	r.addRoute("DELETE", url, handler)
-}
-
-func (r *Router) Put(url string, handler interfaces.HandlerFunc) {
-	r.addRoute("PUT", url, handler)
+// Parse request body to map to the dto.
+func parseJson(js string, dto reflect.Value) {
+	if js != "" {
+		var fieldMap map[string]interface{}
+		err := json.Unmarshal([]byte(js), &fieldMap)
+		if err != nil {
+			return
+		}
+		for i := 0; i < dto.Type().NumField(); i++ {
+			field := fieldMap[dto.Type().Field(i).Name]
+			if !dto.Field(i).CanSet() {
+				// skip the field of can not set.
+				continue
+			}
+			dto.Field(i).Set(reflect.ValueOf(field))
+		}
+	}
 }

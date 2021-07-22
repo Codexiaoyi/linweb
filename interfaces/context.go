@@ -17,6 +17,7 @@ type IRequest interface {
 	Query(key string) string
 	Path() string
 	Method() string
+	Body() string
 }
 
 // Set response data to http.ResponseWriter

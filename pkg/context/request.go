@@ -1,6 +1,7 @@
 package context
 
 import (
+	"io/ioutil"
 	"linweb/interfaces"
 	"net/http"
 )
@@ -27,4 +28,12 @@ func (req *Request) Path() string {
 
 func (req *Request) Method() string {
 	return req.req.Method
+}
+
+func (req *Request) Body() string {
+	body, err := ioutil.ReadAll(req.req.Body)
+	if err != nil {
+		return ""
+	}
+	return string(body)
 }
