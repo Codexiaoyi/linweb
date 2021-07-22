@@ -1,6 +1,10 @@
 package interfaces
 
+import "net/http"
+
 type IContext interface {
+	//create an instance
+	New(http.ResponseWriter, *http.Request) IContext
 	//set params in url
 	SetParams(map[string]string)
 	Request() IRequest
