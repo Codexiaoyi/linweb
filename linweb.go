@@ -2,8 +2,6 @@ package linweb
 
 import (
 	"linweb/interfaces"
-	"linweb/pkg/context"
-	"linweb/pkg/router"
 	"net/http"
 	"reflect"
 )
@@ -13,12 +11,8 @@ type Linweb struct {
 	context interfaces.IContext
 }
 
-func New() *Linweb {
-	return &Linweb{router: router.NewRouter(), context: context.NewContext()}
-}
-
 // You can import your IRouter and IContext implements.
-func NewLinweb(router interfaces.IRouter, context interfaces.IContext) *Linweb {
+func New(router interfaces.IRouter, context interfaces.IContext) *Linweb {
 	return &Linweb{router: router, context: context}
 }
 
@@ -34,7 +28,7 @@ func (linweb *Linweb) Run(addr string) error {
 
 func (linweb *Linweb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//according the linweb's context implement to create a new implement type,
-	//by call method "NewContext"
+	//by call method "New"
 	newResults := reflect.New(reflect.ValueOf(linweb.context).Type()).Elem().MethodByName("New").Call([]reflect.Value{reflect.ValueOf(w), reflect.ValueOf(req)})
 	//convert this object to interfaces.IContext
 	context := newResults[0].Interface().(interfaces.IContext)

@@ -19,13 +19,15 @@ func TestModel(t *testing.T) {
 		Password string
 		Email    string
 	}
-	r := &RegisterDto{
+
+	dto := &RegisterDto{
 		Name:     "test",
 		Password: "12345678912345678",
 		Email:    "123456@aa.com",
 	}
-	u := &UserModel{}
-	err := NewModel(r).Validate().MapTo(u).ModelError()
+
+	user := &UserModel{}
+	err := New(dto).Validate().MapToByFieldName(user).ModelError()
 	assert.Empty(t, err)
-	assert.Equal(t, "test", u.Name)
+	assert.Equal(t, "test", user.Name)
 }

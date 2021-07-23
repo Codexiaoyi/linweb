@@ -10,7 +10,7 @@ type Request struct {
 	req *http.Request
 }
 
-func newRequest(req *http.Request) interfaces.IRequest {
+func NewRequest(req *http.Request) interfaces.IRequest {
 	return &Request{req: req}
 }
 

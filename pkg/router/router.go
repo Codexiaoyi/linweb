@@ -13,23 +13,8 @@ type Router struct {
 	handlers map[string]*Function
 }
 
-func NewRouter() interfaces.IRouter {
+func New() interfaces.IRouter {
 	return &Router{root: make(map[MethodType]*node), handlers: make(map[string]*Function)}
-}
-
-func parsePattern(pattern string) []string {
-	vs := strings.Split(pattern, "/")
-
-	parts := make([]string, 0)
-	for _, item := range vs {
-		if item != "" {
-			parts = append(parts, item)
-			if item[0] == '*' {
-				break
-			}
-		}
-	}
-	return parts
 }
 
 func (r *Router) AddControllers(controllers []interface{}) {
@@ -100,6 +85,21 @@ func (r *Router) Handle(c interfaces.IContext) {
 	}
 	// not has exists node in the trie, return 404.
 	c.Response().String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Request().Path())
+}
+
+func parsePattern(pattern string) []string {
+	vs := strings.Split(pattern, "/")
+
+	parts := make([]string, 0)
+	for _, item := range vs {
+		if item != "" {
+			parts = append(parts, item)
+			if item[0] == '*' {
+				break
+			}
+		}
+	}
+	return parts
 }
 
 // Parse request body to map to the dto.

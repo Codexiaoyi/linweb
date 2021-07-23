@@ -12,7 +12,7 @@ type Model struct {
 	err error
 }
 
-func NewModel(model interface{}) interfaces.IModel {
+func New(model interface{}) interfaces.IModel {
 	return &Model{
 		m: model,
 	}
@@ -32,7 +32,7 @@ func (m *Model) Validate() interfaces.IModel {
 	return m
 }
 
-func (m *Model) MapTo(dest interface{}) interfaces.IModel {
+func (m *Model) MapToByFieldName(dest interface{}) interfaces.IModel {
 	if m.err != nil {
 		return m
 	}
@@ -43,7 +43,12 @@ func (m *Model) MapTo(dest interface{}) interfaces.IModel {
 	return m
 }
 
-func (m *Model) MapBy(src interface{}) interfaces.IModel {
+func (m *Model) MapToByFieldTag(dest interface{}) interfaces.IModel {
+	//TODO
+	return m
+}
+
+func (m *Model) MapFromByFieldName(src interface{}) interfaces.IModel {
 	if m.err != nil {
 		return m
 	}
@@ -54,9 +59,11 @@ func (m *Model) MapBy(src interface{}) interfaces.IModel {
 	return m
 }
 
-func (m *Model) ModelError() string {
-	if m.err != nil {
-		return m.err.Error()
-	}
-	return ""
+func (m *Model) MapFromByFieldTag(src interface{}) interfaces.IModel {
+	//TODO
+	return m
+}
+
+func (m *Model) ModelError() error {
+	return m.err
 }

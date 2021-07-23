@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	r := linweb.New()
+	r := linweb.NewLinweb()
 	r.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
 	r.Run(":9999")
 }
