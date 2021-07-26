@@ -25,9 +25,11 @@ func TestModel(t *testing.T) {
 		Password: "12345678912345678",
 		Email:    "123456@aa.com",
 	}
-
+	customizeModel := &Model{}
 	user := &UserModel{}
-	err := New(dto).Validate().MapToByFieldName(user).ModelError()
+	err := customizeModel.New(dto).Validate()
+	assert.Empty(t, err)
+	err = customizeModel.New(dto).MapToByFieldName(user)
 	assert.Empty(t, err)
 	assert.Equal(t, "test", user.Name)
 }
