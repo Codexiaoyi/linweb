@@ -72,19 +72,25 @@ func (r *Router) Handle(c interfaces.IContext) {
 		// map all route fuction to get the function info.
 		handler := r.handlers[key]
 		if handler != nil {
-			// call controller's method.
-			if !handler.Dto.IsValid() {
-				handler.Recv.MethodByName(handler.Name).Call([]reflect.Value{reflect.ValueOf(c)})
-			} else {
-				// parse request body to map to the dto.
-				parseJson(c.Request().Body(), handler.Dto)
-				handler.Recv.MethodByName(handler.Name).Call([]reflect.Value{reflect.ValueOf(c), handler.Dto})
+			middlewareFunc := func(c interfaces.IContext) {
+				// call controller's method.
+				if !handler.Dto.IsValid() {
+					handler.Recv.MethodByName(handler.Name).Call([]reflect.Value{reflect.ValueOf(c)})
+				} else {
+					// parse request body to map to the dto.
+					parseJson(c.Request().Body(), handler.Dto)
+					handler.Recv.MethodByName(handler.Name).Call([]reflect.Value{reflect.ValueOf(c), handler.Dto})
+				}
 			}
-			return
+			c.Middleware().AddMiddlewares(middlewareFunc)
 		}
+	} else {
+		c.Middleware().AddMiddlewares(func(c interfaces.IContext) {
+			// not has exists node in the trie, return 404.
+			c.Response().String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Request().Path())
+		})
 	}
-	// not has exists node in the trie, return 404.
-	c.Response().String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Request().Path())
+	c.Next()
 }
 
 func parsePattern(pattern string) []string {

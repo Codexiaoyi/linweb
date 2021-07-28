@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"linweb/interfaces"
 	"linweb/pkg/context"
+	"linweb/pkg/middleware"
+	"linweb/pkg/model"
 	"linweb/pkg/router"
 	"log"
 	"net/http"
@@ -11,8 +13,11 @@ import (
 )
 
 type Linweb struct {
-	router  interfaces.IRouter
-	context interfaces.IContext
+	router       interfaces.IRouter
+	mark_context interfaces.IContext
+	// this middleware means an implement, every request need create a new middleware from New() by mark_middleware.
+	mark_middleware interfaces.IMiddleware
+	middlewareFuncs []interfaces.HandlerFunc
 }
 
 func NewLinweb() *Linweb {
@@ -29,11 +34,15 @@ func (linweb *Linweb) AddCustomizePlugins(plugins ...interface{}) {
 			continue
 		}
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IContext)(nil)).Elem()) {
-			linweb.context = p.(interfaces.IContext)
+			linweb.mark_context = p.(interfaces.IContext)
 			continue
 		}
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IModel)(nil)).Elem()) {
 			plugins_model = p.(interfaces.IModel)
+			continue
+		}
+		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IMiddleware)(nil)).Elem()) {
+			linweb.mark_middleware = p.(interfaces.IMiddleware)
 			continue
 		}
 		log.Fatal(fmt.Sprintf("'%s' is not a plugin, please check if it implements a plugin", reflect.TypeOf(p).Elem().Name()))
@@ -48,16 +57,36 @@ func (linweb *Linweb) AddControllers(obj ...interface{}) {
 	linweb.router.AddControllers(obj)
 }
 
+// Add global middlewares
+func (linweb *Linweb) AddMiddlewares(middlewareFuncs ...interfaces.HandlerFunc) {
+	linweb.middlewareFuncs = middlewareFuncs
+}
+
 // Run you project to listen the "addr", enjoy yourself!
 func (linweb *Linweb) Run(addr string) error {
 	return http.ListenAndServe(addr, linweb)
 }
 
 func (linweb *Linweb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if linweb.context == nil {
-		linweb.context = &context.Context{}
+	if linweb.mark_context == nil {
+		linweb.mark_context = &context.Context{}
 	}
+	if linweb.mark_middleware == nil {
+		linweb.mark_middleware = &middleware.Middleware{}
+	}
+	//create a new middleware to current request
+	middleware := linweb.mark_middleware.New(linweb.middlewareFuncs...)
 	//create a new context for current request
-	context := linweb.context.New(w, req)
+	context := linweb.mark_context.New(w, req, middleware)
 	linweb.router.Handle(context)
+}
+
+var plugins_model interfaces.IModel
+
+// Create a new model plugin.
+func NewModel(m interface{}) interfaces.IModel {
+	if plugins_model == nil {
+		plugins_model = &model.Model{}
+	}
+	return plugins_model.New(m)
 }

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"linweb"
 	"linweb/interfaces"
 	"net/http"
 )
@@ -11,16 +11,19 @@ type LoginDto struct {
 	Password string `json:"Password"`
 }
 
-type UserController struct {
+type DatabaseModel struct {
+	Name     string
+	Password string
 }
 
-//[GET("/hello")]
-func (user *UserController) Hello(c interfaces.IContext) {
-	c.Response().HTML(http.StatusOK, "<h1>Hello linweb</h1>")
+type UserController struct {
 }
 
 //[POST("/login")]
 func (user *UserController) Login(c interfaces.IContext, dto LoginDto) {
-	fmt.Println(dto)
+	model := linweb.NewModel(dto)
+	model.Validate()
+	dataModel := &DatabaseModel{}
+	model.MapToByFieldName(dataModel)
 	c.Response().String(http.StatusOK, "Welcome %s!", dto.Name)
 }

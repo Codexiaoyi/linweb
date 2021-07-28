@@ -4,9 +4,11 @@ import "net/http"
 
 type IContext interface {
 	//create an instance
-	New(http.ResponseWriter, *http.Request) IContext
+	New(http.ResponseWriter, *http.Request, IMiddleware) IContext
 	Request() IRequest
 	Response() IResponse
+	Middleware() IMiddleware
+	Next()
 }
 
 // Get request data in *http.Request
