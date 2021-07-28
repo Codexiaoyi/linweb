@@ -33,7 +33,7 @@ func (linweb *Linweb) AddCustomizePlugins(plugins ...interface{}) {
 			continue
 		}
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IModel)(nil)).Elem()) {
-			Model = p.(interfaces.IModel)
+			plugins_model = p.(interfaces.IModel)
 			continue
 		}
 		log.Fatal(fmt.Sprintf("'%s' is not a plugin, please check if it implements a plugin", reflect.TypeOf(p).Elem().Name()))

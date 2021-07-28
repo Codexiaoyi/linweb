@@ -5,4 +5,9 @@ import (
 	"linweb/pkg/model"
 )
 
-var Model interfaces.IModel = &model.Model{}
+var plugins_model interfaces.IModel = &model.Model{}
+
+// Create a new model plugin.
+func NewModel(model interface{}) interfaces.IModel {
+	return plugins_model.New(model)
+}

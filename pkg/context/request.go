@@ -7,11 +7,15 @@ import (
 )
 
 type Request struct {
-	req *http.Request
+	req    *http.Request
+	params map[string]string
 }
 
 func NewRequest(req *http.Request) interfaces.IRequest {
-	return &Request{req: req}
+	return &Request{
+		req:    req,
+		params: make(map[string]string),
+	}
 }
 
 func (req *Request) PostForm(key string) string {
@@ -36,4 +40,12 @@ func (req *Request) Body() string {
 		return ""
 	}
 	return string(body)
+}
+
+func (req *Request) SetParams(params map[string]string) {
+	req.params = params
+}
+
+func (req *Request) Param(key string) string {
+	return req.params[key]
 }

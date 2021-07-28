@@ -11,7 +11,7 @@ import (
 func TestAddCustomizePlugins(t *testing.T) {
 	linweb := NewLinweb()
 	linweb.AddCustomizePlugins(&demoModel{})
-	assert.Equal(t, "TestModelDemo", Model.New(nil).Validate().Error())
+	assert.Equal(t, "TestModelDemo", NewModel(nil).Validate().Error())
 }
 
 type demoModel struct {

@@ -67,7 +67,7 @@ func (r *Router) Handle(c interfaces.IContext) {
 	n, params := r.getRoute(getMethodType(c.Request().Method()), c.Request().Path())
 	if n != nil {
 		// set the params of url to the context.
-		c.SetParams(params)
+		c.Request().SetParams(params)
 		key := c.Request().Method() + "-" + n.url
 		// map all route fuction to get the function info.
 		handler := r.handlers[key]

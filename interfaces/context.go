@@ -5,23 +5,23 @@ import "net/http"
 type IContext interface {
 	//create an instance
 	New(http.ResponseWriter, *http.Request) IContext
-	//set params in url
-	SetParams(map[string]string)
 	Request() IRequest
 	Response() IResponse
-	//get url param
-	Param(string) string
 }
 
 // Get request data in *http.Request
 type IRequest interface {
 	// get post form
 	PostForm(key string) string
-	// get query data
+	// get query data in url
 	Query(key string) string
 	Path() string
 	Method() string
 	Body() string
+	// set params in url
+	SetParams(map[string]string)
+	// get param in url
+	Param(string) string
 }
 
 // Set response data to http.ResponseWriter
