@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	l := linweb.NewLinweb()
+	l := linweb.NewLinWeb()
 	l.AddMiddlewares(PrintHelloMiddleware)
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
 	l.Run(":9999")

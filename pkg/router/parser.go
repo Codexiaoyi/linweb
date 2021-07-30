@@ -19,7 +19,7 @@ type Function struct {
 	Method MethodType
 	// url of route.
 	Url string
-	// reciever of the Controller method.
+	// receiver of the Controller method.
 	Recv reflect.Value
 	// dto will be automatically instantiated according to the body
 	// in json format.
@@ -31,7 +31,7 @@ type Parser struct {
 	visitor *visitor
 }
 
-// Parse registered controllers to a parser,
+// NewParser Parse registered controllers to a parser,
 // parser contains function slice, each function
 // has the information needed by the router.
 func NewParser(controllers []interface{}) *Parser {
@@ -120,7 +120,7 @@ type visitFunc struct {
 	outNames []string
 }
 
-// Implement ast.Visitor to parse func node
+// Visit Implement ast.Visitor to parse func node
 func (v *visitor) Visit(node ast.Node) (w ast.Visitor) {
 	if node != nil {
 		if funcDecl, ok := node.(*ast.FuncDecl); ok && isValidFunc(funcDecl) {
@@ -128,11 +128,11 @@ func (v *visitor) Visit(node ast.Node) (w ast.Visitor) {
 			ft := funcDecl.Recv.List[0].Type
 
 			if starExpr, ok := ft.(*ast.StarExpr); ok {
-				// method reciever is point.
+				// method receiver is point.
 				//ex:(x *X)
 				typeName = starExpr.X.(*ast.Ident).Obj.Name
 			} else if ident, ok := ft.(*ast.Ident); ok {
-				// method reciever is type struct.
+				// method receiver is type struct.
 				//ex:(x X)
 				typeName = ident.Name
 			} else {

@@ -69,7 +69,7 @@ func (r *Router) Handle(c interfaces.IContext) {
 		// set the params of url to the context.
 		c.Request().SetParams(params)
 		key := c.Request().Method() + "-" + n.url
-		// map all route fuction to get the function info.
+		// map all route function to get the function info.
 		handler := r.handlers[key]
 		if handler != nil {
 			middlewareFunc := func(c interfaces.IContext) {

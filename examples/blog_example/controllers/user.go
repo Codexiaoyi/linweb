@@ -19,7 +19,7 @@ type DatabaseModel struct {
 type UserController struct {
 }
 
-//[POST("/login")]
+// Login [POST("/login")]
 func (user *UserController) Login(c interfaces.IContext, dto LoginDto) {
 	model := linweb.NewModel(dto)
 	model.Validate()
