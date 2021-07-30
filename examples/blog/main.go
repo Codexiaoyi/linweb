@@ -3,15 +3,20 @@ package main
 import (
 	"fmt"
 	"linweb"
-	"linweb/examples/blog_example/controllers"
+	"linweb/examples/blog/controllers"
 	"linweb/interfaces"
+	"log"
 )
 
 func main() {
-	l := linweb.NewLinweb()
+	l := linweb.NewLinWeb()
 	l.AddMiddlewares(PrintHelloMiddleware)
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
-	l.Run(":9999")
+	err := l.Run(":4560")
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
 }
 
 func PrintHelloMiddleware(c interfaces.IContext) {

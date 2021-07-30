@@ -9,9 +9,9 @@ type Middleware struct {
 	index int
 }
 
-func (m *Middleware) New(middlewareFuncs ...interfaces.HandlerFunc) interfaces.IMiddleware {
+func (m *Middleware) New(middlewareFunc ...interfaces.HandlerFunc) interfaces.IMiddleware {
 	return &Middleware{
-		funcs: middlewareFuncs,
+		funcs: middlewareFunc,
 		index: -1,
 	}
 }
@@ -24,6 +24,6 @@ func (m *Middleware) Next(context interfaces.IContext) {
 	}
 }
 
-func (m *Middleware) AddMiddlewares(middlewareFuncs ...interfaces.HandlerFunc) {
-	m.funcs = append(m.funcs, middlewareFuncs...)
+func (m *Middleware) AddMiddlewares(middlewareFunc ...interfaces.HandlerFunc) {
+	m.funcs = append(m.funcs, middlewareFunc...)
 }

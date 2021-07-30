@@ -12,81 +12,81 @@ import (
 	"reflect"
 )
 
-type Linweb struct {
-	router       interfaces.IRouter
-	mark_context interfaces.IContext
-	// this middleware means an implement, every request need create a new middleware from New() by mark_middleware.
-	mark_middleware interfaces.IMiddleware
-	middlewareFuncs []interfaces.HandlerFunc
+var pluginsModel interfaces.IModel
+
+type LinWeb struct {
+	router      interfaces.IRouter
+	markContext interfaces.IContext
+	// this middleware means an implement, every request need create a new middleware from New() by markMiddleware.
+	markMiddleware interfaces.IMiddleware
+	middlewareFunc []interfaces.HandlerFunc
 }
 
-func NewLinweb() *Linweb {
-	return &Linweb{}
+func NewLinWeb() *LinWeb {
+	return &LinWeb{}
 }
 
-// Add customize plugins, they must all be of pointer type.
+// AddCustomizePlugins Add customize plugins, they must all be of pointer type.
 // It is not allowed to pass in non-plugin implementations.
 // Without customize plugins will use the default plugins.
-func (linweb *Linweb) AddCustomizePlugins(plugins ...interface{}) {
+func (lin *LinWeb) AddCustomizePlugins(plugins ...interface{}) {
 	for _, p := range plugins {
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IRouter)(nil)).Elem()) {
-			linweb.router = p.(interfaces.IRouter)
+			lin.router = p.(interfaces.IRouter)
 			continue
 		}
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IContext)(nil)).Elem()) {
-			linweb.mark_context = p.(interfaces.IContext)
+			lin.markContext = p.(interfaces.IContext)
 			continue
 		}
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IModel)(nil)).Elem()) {
-			plugins_model = p.(interfaces.IModel)
+			pluginsModel = p.(interfaces.IModel)
 			continue
 		}
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IMiddleware)(nil)).Elem()) {
-			linweb.mark_middleware = p.(interfaces.IMiddleware)
+			lin.markMiddleware = p.(interfaces.IMiddleware)
 			continue
 		}
 		log.Fatal(fmt.Sprintf("'%s' is not a plugin, please check if it implements a plugin", reflect.TypeOf(p).Elem().Name()))
 	}
 }
 
-// Add all controllers, they must all be of pointer type
-func (linweb *Linweb) AddControllers(obj ...interface{}) {
-	if linweb.router == nil {
-		linweb.router = router.New()
+// AddControllers Add all controllers, they must all be of pointer type
+func (lin *LinWeb) AddControllers(obj ...interface{}) {
+	if lin.router == nil {
+		lin.router = router.New()
 	}
-	linweb.router.AddControllers(obj)
+	lin.router.AddControllers(obj)
 }
 
-// Add global middlewares
-func (linweb *Linweb) AddMiddlewares(middlewareFuncs ...interfaces.HandlerFunc) {
-	linweb.middlewareFuncs = middlewareFuncs
+// AddMiddlewares Add global middlewares
+func (lin *LinWeb) AddMiddlewares(middlewareFunc ...interfaces.HandlerFunc) {
+	lin.middlewareFunc = middlewareFunc
 }
 
 // Run you project to listen the "addr", enjoy yourself!
-func (linweb *Linweb) Run(addr string) error {
-	return http.ListenAndServe(addr, linweb)
+func (lin *LinWeb) Run(addr string) error {
+	return http.ListenAndServe(addr, lin)
 }
 
-func (linweb *Linweb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if linweb.mark_context == nil {
-		linweb.mark_context = &context.Context{}
+func (lin *LinWeb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if lin.markContext == nil {
+		lin.markContext = &context.Context{}
 	}
-	if linweb.mark_middleware == nil {
-		linweb.mark_middleware = &middleware.Middleware{}
+	if lin.markMiddleware == nil {
+		lin.markMiddleware = &middleware.Middleware{}
 	}
 	//create a new middleware to current request
-	middleware := linweb.mark_middleware.New(linweb.middlewareFuncs...)
+	middleware := lin.markMiddleware.New(lin.middlewareFunc...)
 	//create a new context for current request
-	context := linweb.mark_context.New(w, req, middleware)
-	linweb.router.Handle(context)
+	ctx := lin.markContext.New(w, req, middleware)
+	lin.router.Handle(ctx)
 }
 
-var plugins_model interfaces.IModel
-
-// Create a new model plugin.
+// NewModel Create a new model plugin.
 func NewModel(m interface{}) interfaces.IModel {
-	if plugins_model == nil {
-		plugins_model = &model.Model{}
+	if pluginsModel == nil {
+		pluginsModel = &model.Model{}
 	}
-	return plugins_model.New(m)
+	return pluginsModel.New(m)
 }

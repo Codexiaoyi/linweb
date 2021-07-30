@@ -9,7 +9,7 @@ import (
 )
 
 func TestAddCustomizePlugins(t *testing.T) {
-	linweb := NewLinweb()
+	linweb := NewLinWeb()
 	linweb.AddCustomizePlugins(&demoModel{})
 	assert.Equal(t, "TestModelDemo", NewModel(nil).Validate().Error())
 }
