@@ -2,48 +2,36 @@ package linweb
 
 import (
 	"errors"
-	"linweb/interfaces"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"linweb/test/mocks"
+
+	"github.com/golang/mock/gomock"
+	"gopkg.in/go-playground/assert.v1"
 )
 
 func TestAddCustomizePlugins(t *testing.T) {
+	// Arrange:mock data
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	// mock a request instance
+	mock_request := mocks.NewMockIRequest(ctrl)
+	mock_request.EXPECT().Param("mock_param").Return("test_param")
+	// mock a new context instance
+	mock_context := mocks.NewMockIContext(ctrl)
+	mock_context.EXPECT().Request().Return(mock_request)
+	mock_context.EXPECT().New(gomock.Nil(), gomock.Nil(), gomock.Nil()).Return(mock_context)
+	// mock model
+	mock_model := mocks.NewMockIModel(ctrl)
+	mock_model.EXPECT().New(gomock.Nil()).Return(mock_model)
+	mock_model.EXPECT().ModelError().Return(errors.New("test_mock_model error"))
+
+	//Act
 	linweb := NewLinWeb()
-	linweb.AddCustomizePlugins(&demoModel{})
-	assert.Equal(t, "TestModelDemo", NewModel(nil).Validate().Error())
-}
+	linweb.AddCustomizePlugins(mock_context, mock_model)
+	ctx := linweb.markContext.New(nil, nil, nil)
 
-type demoModel struct {
-	m interface{}
-}
-
-func (m *demoModel) New(model interface{}) interfaces.IModel {
-	return &demoModel{
-		m: model,
-	}
-}
-
-func (m *demoModel) Validate() error {
-	return errors.New("TestModelDemo")
-}
-
-func (m *demoModel) MapToByFieldName(dest interface{}) error {
-
-	return nil
-}
-
-func (m *demoModel) MapToByFieldTag(dest interface{}) error {
-	//TODO
-	return nil
-}
-
-func (m *demoModel) MapFromByFieldName(src interface{}) error {
-
-	return nil
-}
-
-func (m *demoModel) MapFromByFieldTag(src interface{}) error {
-	//TODO
-	return nil
+	//Assert
+	assert.Equal(t, "test_param", ctx.Request().Param("mock_param"))
+	assert.Equal(t, "test_mock_model error", NewModel(nil).ModelError().Error())
 }

@@ -6,13 +6,15 @@ type IModel interface {
 	// New create a new model
 	New(model interface{}) IModel
 	// Validate follow the rules to validate this model.
-	Validate() error
+	Validate() IModel
 	// MapToByFieldName map this model to target model by field name.
-	MapToByFieldName(dest interface{}) error
+	MapToByFieldName(dest interface{}) IModel
 	// MapToByFieldTag map this model to target model by field tag.
-	MapToByFieldTag(dest interface{}) error
+	MapToByFieldTag(dest interface{}) IModel
 	// MapFromByFieldName this model is map from source model by field name.
-	MapFromByFieldName(src interface{}) error
+	MapFromByFieldName(src interface{}) IModel
 	// MapFromByFieldTag this model is map from source model by field tag.
-	MapFromByFieldTag(src interface{}) error
+	MapFromByFieldTag(src interface{}) IModel
+	// model chain error
+	ModelError() error
 }

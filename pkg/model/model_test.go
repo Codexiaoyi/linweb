@@ -27,9 +27,7 @@ func TestModel(t *testing.T) {
 	}
 	customizeModel := &Model{}
 	user := &UserModel{}
-	err := customizeModel.New(dto).Validate()
-	assert.Empty(t, err)
-	err = customizeModel.New(dto).MapToByFieldName(user)
+	err := customizeModel.New(dto).Validate().MapToByFieldName(user).ModelError()
 	assert.Empty(t, err)
 	assert.Equal(t, "test", user.Name)
 }

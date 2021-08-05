@@ -8,46 +8,73 @@ import (
 )
 
 type Model struct {
-	m interface{}
+	model interface{}
+	err   error
 }
 
 func (m *Model) New(model interface{}) interfaces.IModel {
 	return &Model{
-		m: model,
+		model: model,
+		err:   nil,
 	}
 }
 
-func (m *Model) Validate() error {
+func (model *Model) Validate() interfaces.IModel {
+	if model.err != nil {
+		return model
+	}
 	v := validator.New()
-	err := v.Struct(m.m)
+	err := v.Struct(model.model)
 	if err != nil {
-		return err
+		model.err = err
 	}
-	return nil
+	return model
 }
 
-func (m *Model) MapToByFieldName(dest interface{}) error {
-	err := mapper.StructMapByFieldName(m.m, dest)
+func (model *Model) MapToByFieldName(dest interface{}) interfaces.IModel {
+	if model.err != nil {
+		return model
+	}
+	err := mapper.StructMapByFieldName(model.model, dest)
 	if err != nil {
-		return err
+		model.err = err
 	}
-	return nil
+	return model
 }
 
-func (m *Model) MapToByFieldTag(dest interface{}) error {
-	//TODO
-	return nil
-}
-
-func (m *Model) MapFromByFieldName(src interface{}) error {
-	err := mapper.StructMapByFieldName(src, m.m)
+func (model *Model) MapToByFieldTag(dest interface{}) interfaces.IModel {
+	if model.err != nil {
+		return model
+	}
+	err := mapper.StructMapByFieldTag(model.model, dest)
 	if err != nil {
-		return err
+		model.err = err
 	}
-	return nil
+	return model
 }
 
-func (m *Model) MapFromByFieldTag(src interface{}) error {
-	//TODO
-	return nil
+func (model *Model) MapFromByFieldName(src interface{}) interfaces.IModel {
+	if model.err != nil {
+		return model
+	}
+	err := mapper.StructMapByFieldName(src, model.model)
+	if err != nil {
+		model.err = err
+	}
+	return model
+}
+
+func (model *Model) MapFromByFieldTag(src interface{}) interfaces.IModel {
+	if model.err != nil {
+		return model
+	}
+	err := mapper.StructMapByFieldTag(src, model.model)
+	if err != nil {
+		model.err = err
+	}
+	return model
+}
+
+func (model *Model) ModelError() error {
+	return model.err
 }
