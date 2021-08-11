@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"reflect"
+	"sync"
 )
 
 var pluginsModel interfaces.IModel
@@ -20,6 +21,8 @@ type LinWeb struct {
 	// this middleware means an implement, every request need create a new middleware from New() by markMiddleware.
 	markMiddleware interfaces.IMiddleware
 	middlewareFunc []interfaces.HandlerFunc
+
+	contextPool sync.Pool
 }
 
 func NewLinWeb() *LinWeb {
@@ -66,21 +69,30 @@ func (lin *LinWeb) AddMiddlewares(middlewareFunc ...interfaces.HandlerFunc) {
 
 // Run you project to listen the "addr", enjoy yourself!
 func (lin *LinWeb) Run(addr string) error {
-	return http.ListenAndServe(addr, lin)
-}
-
-func (lin *LinWeb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if lin.markContext == nil {
 		lin.markContext = &context.Context{}
 	}
 	if lin.markMiddleware == nil {
 		lin.markMiddleware = &middleware.Middleware{}
 	}
+	lin.contextPool.New = func() interface{} {
+		//create a new context for current request
+		return lin.markContext.New()
+	}
+	return http.ListenAndServe(addr, lin)
+}
+
+func (lin *LinWeb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//create a new middleware to current request
 	middleware := lin.markMiddleware.New(lin.middlewareFunc...)
-	//create a new context for current request
-	ctx := lin.markContext.New(w, req, middleware)
+	// get a context from pool
+	ctx := lin.contextPool.Get().(interfaces.IContext)
+	ctx.Reset(w, req, middleware)
+
 	lin.router.Handle(ctx)
+
+	//end handle, take context to pool
+	lin.contextPool.Put(ctx)
 }
 
 // NewModel Create a new model plugin.

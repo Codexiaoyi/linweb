@@ -12,12 +12,14 @@ type Context struct {
 	middleware interfaces.IMiddleware
 }
 
-func (c *Context) New(w http.ResponseWriter, req *http.Request, m interfaces.IMiddleware) interfaces.IContext {
-	return &Context{
-		response:   NewResponse(w),
-		request:    NewRequest(req),
-		middleware: m,
-	}
+func (c *Context) New() interfaces.IContext {
+	return &Context{}
+}
+
+func (c *Context) Reset(w http.ResponseWriter, req *http.Request, m interfaces.IMiddleware) {
+	c.request = NewRequest(req)
+	c.response = NewResponse(w)
+	c.middleware = m
 }
 
 func (c *Context) Request() interfaces.IRequest {

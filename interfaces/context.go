@@ -4,8 +4,12 @@ import "net/http"
 
 type IContext interface {
 	// New create an instance
-	New(http.ResponseWriter, *http.Request, IMiddleware) IContext
+	New() IContext
+	// Injecting dependencies and reset this Context. In order to use sync.Pool to reuse Context.
+	Reset(http.ResponseWriter, *http.Request, IMiddleware)
+	// Get http request info.
 	Request() IRequest
+	// Get http response info.
 	Response() IResponse
 	Middleware() IMiddleware
 	Next()
