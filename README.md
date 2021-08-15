@@ -29,7 +29,6 @@ linWeb提供一套插件接口及默认实现，你也可以通过***AddCustomiz
 ## 如何使用linWeb？
 
 > ###### 详细示例都在examples目录下
->
 
 - ### Run
 
@@ -126,7 +125,7 @@ func main() {
 
 - ### Model
 
-model用于对struct的模型验证与映射，可以通过***NewModel***方法传入需要操作的struct，通过调用Validate、MapToByFieldName等方法实现验证和Dto映射。目前使用[validator](https://github.com/go-playground/validator)、[go-mapper](https://github.com/Codexiaoyi/go-mapper)实现验证与映射功能，使用规则详见链接。
+model用于对struct的模型验证与映射，采用**链式调用**的方式，可以通过***NewModel***方法传入需要操作的struct，通过调用Validate、MapToByFieldName等方法实现验证和Dto映射。目前使用[validator](https://github.com/go-playground/validator)、[go-mapper](https://github.com/Codexiaoyi/go-mapper)实现验证与映射功能，使用规则详见链接。
 
 ```go
 type LoginDto struct {
@@ -144,10 +143,11 @@ type UserController struct {
 
 //[POST("/login")]
 func (user *UserController) Login(c interfaces.IContext, dto LoginDto) {
-	model := linWeb.NewModel(dto)
-	model.Validate()
 	dataModel := &DatabaseModel{}
-	model.MapToByFieldName(dataModel)
+	err := linweb.NewModel(dto).Validate().MapToByFieldName(dataModel).ModelError()
+	if err != nil {
+		c.Response().String(http.StatusInternalServerError, "Model error :%s!", err.Error())
+	}
 	c.Response().String(http.StatusOK, "Welcome %s!", dto.Name)
 }
 ```
