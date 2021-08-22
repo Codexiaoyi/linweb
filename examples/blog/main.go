@@ -5,12 +5,9 @@ import (
 	"linweb/examples/blog/controllers"
 	"linweb/interfaces"
 	"log"
-
-	"github.com/pkg/profile"
 )
 
 func main() {
-	defer profile.Start(profile.MemProfile, profile.MemProfileRate(1)).Stop()
 	l := linweb.NewLinWeb()
 	l.AddMiddlewares(PrintHelloMiddleware)
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
