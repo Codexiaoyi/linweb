@@ -21,25 +21,36 @@ type Cache struct {
 }
 
 // The cache can only be created once.
-func New(maxBytes int64) *Cache {
+func Instance() *Cache {
 	cacheOnce.Do(func() {
-		onExpireDelete := func(key string) {
+		onKeyDelete := func(key string) {
 			if cache != nil {
 				cache.Delete(key)
 			}
 		}
 		cache = &Cache{
-			maxBytes: maxBytes,
-			lru:      newLru(2),
-			sweeper:  newSweeper(5, onExpireDelete),
+			lru:     newLru(2, onKeyDelete),
+			sweeper: newSweeper(5*time.Second, onKeyDelete),
 		}
 	})
 	return cache
 }
 
+// Set the cache can use max bytes.
+func (c *Cache) SetMaxBytes(maxBytes int64) {
+	c.maxBytes = maxBytes
+}
+
+// Get value by key.If the key is expired, return "nil,false".
 func (c *Cache) Get(key string) (value interfaces.Value, ok bool) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
+	// expired
+	if c.sweeper.isExpired(key) {
+		c.lru.delete(key)
+		delete(c.sweeper.expireMap, key)
+		return nil, false
+	}
 	return c.lru.get(key)
 }
 
@@ -50,12 +61,14 @@ func add(key string, value interfaces.Value) {
 	}
 }
 
+// Add cache.
 func (c *Cache) Add(key string, value interfaces.Value) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	add(key, value)
 }
 
+// Add cache with expire time.
 func (c *Cache) AddWithExpire(key string, value interfaces.Value, expireDuration time.Duration) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
@@ -63,8 +76,12 @@ func (c *Cache) AddWithExpire(key string, value interfaces.Value, expireDuration
 	add(key, value)
 }
 
+// Delete cache.
 func (c *Cache) Delete(key string) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	c.lru.delete(key)
+	if _, ok := c.sweeper.expireMap[key]; ok {
+		delete(c.sweeper.expireMap, key)
+	}
 }

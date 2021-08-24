@@ -16,6 +16,8 @@ type lru struct {
 	historyList *list.List
 	// save key and element of linkList position.
 	cacheMap map[string]*list.Element
+	// callback when the key deleted.
+	onLruDelete func(key string)
 }
 
 type node struct {
@@ -25,12 +27,13 @@ type node struct {
 	value     interfaces.Value
 }
 
-func newLru(k int8) *lru {
+func newLru(k int8, onLruDelete func(key string)) *lru {
 	return &lru{
 		k:           k,
 		cacheList:   list.New(),
 		historyList: list.New(),
 		cacheMap:    make(map[string]*list.Element),
+		onLruDelete: onLruDelete,
 	}
 }
 
@@ -85,6 +88,10 @@ func (l *lru) delete(key string) {
 		}
 		delete(l.cacheMap, node.key)
 		l.currentBytes -= int64(len(node.key)) + int64(node.value.Len())
+		// delete completed, notice deleted event.
+		if l.onLruDelete != nil {
+			l.onLruDelete(node.key)
+		}
 	}
 }
 
@@ -92,10 +99,8 @@ func (l *lru) delete(key string) {
 func (l *lru) removeOldest() {
 	element := l.cacheList.Front()
 	if element != nil {
-		l.cacheList.Remove(element)
 		node := element.Value.(*node)
-		delete(l.cacheMap, node.key)
-		l.currentBytes -= int64(len(node.key)) + int64(node.value.Len())
+		l.delete(node.key)
 	}
 }
 

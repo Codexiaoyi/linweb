@@ -15,7 +15,9 @@ func (v *TestValue) Len() int {
 }
 
 func TestAdd(t *testing.T) {
-	lru := newLru(2)
+	lru := newLru(2, func(key string) {
+		println(key)
+	})
 	lru.add("key1", &TestValue{v: "test string...."})
 	assert.Equal(t, lru.historyList.Len(), 1)
 	assert.Equal(t, lru.cacheList.Len(), 0)
@@ -34,7 +36,9 @@ func TestAdd(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	lru := newLru(2)
+	lru := newLru(2, func(key string) {
+		println(key)
+	})
 	lru.add("key1", &TestValue{v: "test string...."})
 	lru.get("key1")
 	assert.Equal(t, lru.historyList.Len(), 1)

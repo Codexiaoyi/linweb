@@ -3,6 +3,7 @@ package linweb
 import (
 	"fmt"
 	"linweb/interfaces"
+	"linweb/pkg/cache"
 	"linweb/pkg/context"
 	"linweb/pkg/middleware"
 	"linweb/pkg/model"
@@ -13,7 +14,10 @@ import (
 	"sync"
 )
 
-var pluginsModel interfaces.IModel
+var (
+	pluginsModel interfaces.IModel
+	Cache        interfaces.ICache
+)
 
 type LinWeb struct {
 	router      interfaces.IRouter
@@ -34,6 +38,10 @@ func NewLinWeb() *LinWeb {
 // Without customize plugins will use the default plugins.
 func (lin *LinWeb) AddCustomizePlugins(plugins ...interface{}) {
 	for _, p := range plugins {
+		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.ICache)(nil)).Elem()) {
+			Cache = p.(interfaces.ICache)
+			continue
+		}
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IRouter)(nil)).Elem()) {
 			lin.router = p.(interfaces.IRouter)
 			continue
@@ -74,6 +82,9 @@ func (lin *LinWeb) Run(addr string) error {
 	}
 	if lin.markMiddleware == nil {
 		lin.markMiddleware = &middleware.Middleware{}
+	}
+	if Cache == nil {
+		Cache = cache.Instance()
 	}
 	lin.contextPool.New = func() interface{} {
 		//create a new context for current request
