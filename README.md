@@ -91,6 +91,28 @@ func main() {
 }
 ```
 
+- ### Cache
+
+框架内置了缓存，可以自定义最大内存占用，达到上限采用**LRU-K淘汰策略**。缓存可以设置键有效时间，并使用 **惰性删除 和 定期删除** 策略，实现对过期键及时扫描删除。我们可以直接使用linweb提供的Cache单例。
+
+```go
+type BlogController struct {
+}
+
+type Int int
+
+func (d Int) Len() int {
+	return 1
+}
+
+//[GET("/blog/:id")]
+func (blog *BlogController) GetBlog(c interfaces.IContext) {
+	id, _ := strconv.Atoi(c.Request().Param("id"))
+	linweb.Cache.AddWithExpire("id", Int(id), 10*time.Second)
+	c.Response().String(http.StatusOK, "id=%s", c.Request().Param("id"))
+}
+```
+
 - ### Middleware
 
 使用***AddMiddlewares***方法添加多个针对所有api接口的全局中间件。

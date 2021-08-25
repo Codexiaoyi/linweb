@@ -4,7 +4,7 @@ import "time"
 
 type sweeper struct {
 	isSweeping bool
-	// start or stop sweep signal. If send true start sweep, false stop sweep.
+	// sweep status signal. If send true start sweep, false waiting.
 	expireSignal chan bool
 	// sweep interval for expire key.Default value is 5s.
 	expireDuration time.Duration
@@ -42,37 +42,42 @@ func (s *sweeper) tryStartSweep() {
 }
 
 func (s *sweeper) tryStopSweep() {
-	if s.isSweeping && len(s.expireMap) <= 0 {
+	if s.isSweeping && len(s.expireMap) == 0 {
 		s.isSweeping = false
 		s.expireSignal <- false
 	}
 }
 
+// sweep() for cleaning expired keys.
+// Initialize sweep, label "waiting" and select wait start signal,
+// if expireSignal get waiting signal(false), goto waiting.
+// When get start signal, circle to sweep until get waiting signal.
 func (s *sweeper) sweep() {
-Restart:
+waiting:
 	//blocking until signal comes
 	select {
 	case sig := <-s.expireSignal:
 		if !sig {
-			goto Restart
+			goto waiting
 		}
 	}
+
 	//the start signal is coming.
 	for {
 		select {
 		case sig := <-s.expireSignal:
 			//if get false signal, need stop sweep.
 			if !sig {
-				goto Restart
+				goto waiting
 			}
 		default:
+			time.Sleep(s.expireDuration)
 			for key, expireTime := range s.expireMap {
 				// if expire time is before now, need delete this key and value in the cache.
 				if expireTime.Before(time.Now()) {
 					s.delete(key)
 				}
 			}
-			time.Sleep(s.expireDuration)
 			s.tryStopSweep()
 		}
 	}

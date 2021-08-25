@@ -14,19 +14,18 @@ type SweeperTestSuite struct {
 }
 
 func (suite *SweeperTestSuite) SetupTest() {
-	suite.sweeper = newSweeper(3*time.Second, func(key string) {
+	suite.sweeper = newSweeper(100*time.Microsecond, func(key string) {
 		println(key)
 	})
-	suite.sweeper.addExpireKey("key1", 1*time.Second)
-	suite.sweeper.addExpireKey("key2", 2*time.Second)
-	suite.sweeper.addExpireKey("key3", 3*time.Second)
-	suite.sweeper.addExpireKey("key4", 4*time.Second)
 }
 
 func (suite *SweeperTestSuite) TestSweep() {
-	assert.Equal(suite.T(), 4, len(suite.sweeper.expireMap))
-	time.Sleep(6 * time.Second)
+	suite.sweeper.addExpireKey("key1", 10*time.Microsecond)
+	assert.Equal(suite.T(), suite.sweeper.isSweeping, true)
 	assert.Equal(suite.T(), 1, len(suite.sweeper.expireMap))
+	time.Sleep(1200 * time.Microsecond)
+	assert.Equal(suite.T(), 0, len(suite.sweeper.expireMap))
+	assert.Equal(suite.T(), suite.sweeper.isSweeping, false)
 }
 
 func TestSweeperTestSuite(t *testing.T) {
