@@ -17,7 +17,7 @@ type Cache struct {
 	maxBytes int64
 	lru      *lru
 	sweeper  *sweeper
-	mux      sync.Mutex
+	mux      sync.RWMutex
 }
 
 // The cache can only be created once.
@@ -43,12 +43,12 @@ func (c *Cache) SetMaxBytes(maxBytes int64) {
 
 // Get value by key.If the key is expired, return "nil,false".
 func (c *Cache) Get(key string) (value interfaces.Value, ok bool) {
-	c.mux.Lock()
-	defer c.mux.Unlock()
+	c.mux.RLock()
+	defer c.mux.RUnlock()
 	// expired
 	if c.sweeper.isExpired(key) {
 		c.lru.delete(key)
-		delete(c.sweeper.expireMap, key)
+		c.sweeper.delete(key, false)
 		return nil, false
 	}
 	return c.lru.get(key)
@@ -81,7 +81,5 @@ func (c *Cache) Delete(key string) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	c.lru.delete(key)
-	if _, ok := c.sweeper.expireMap[key]; ok {
-		delete(c.sweeper.expireMap, key)
-	}
+	c.sweeper.delete(key, false)
 }

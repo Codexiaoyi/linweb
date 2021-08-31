@@ -3,6 +3,7 @@ package cache
 import (
 	"container/list"
 	"linweb/interfaces"
+	"sync"
 )
 
 type lru struct {
@@ -15,7 +16,8 @@ type lru struct {
 	// history link list.
 	historyList *list.List
 	// save key and element of linkList position.
-	cacheMap map[string]*list.Element
+	//cacheMap map[string]*list.Element
+	cacheMap sync.Map
 	// callback when the key deleted.
 	onLruDelete func(key string)
 }
@@ -32,14 +34,14 @@ func newLru(k int8, onLruDelete func(key string)) *lru {
 		k:           k,
 		cacheList:   list.New(),
 		historyList: list.New(),
-		cacheMap:    make(map[string]*list.Element),
 		onLruDelete: onLruDelete,
 	}
 }
 
 func (l *lru) add(key string, value interfaces.Value) {
 	// key is exist, update value
-	if element, ok := l.cacheMap[key]; ok {
+	if ele, ok := l.cacheMap.Load(key); ok {
+		element := ele.(*list.Element)
 		node := element.Value.(*node)
 		l.currentBytes += int64(value.Len()) - int64(node.value.Len())
 		node.value = value
@@ -57,13 +59,14 @@ func (l *lru) add(key string, value interfaces.Value) {
 			key:       key,
 			value:     value,
 		})
-		l.cacheMap[key] = element
+		l.cacheMap.Store(key, element)
 		l.currentBytes += int64(len(key)) + int64(value.Len())
 	}
 }
 
 func (l *lru) get(key string) (interfaces.Value, bool) {
-	if element, ok := l.cacheMap[key]; ok {
+	if ele, ok := l.cacheMap.Load(key); ok {
+		element := ele.(*list.Element)
 		node := element.Value.(*node)
 		if node.onHistory {
 			node.count++
@@ -79,14 +82,15 @@ func (l *lru) get(key string) (interfaces.Value, bool) {
 }
 
 func (l *lru) delete(key string) {
-	if element, ok := l.cacheMap[key]; ok {
+	if ele, ok := l.cacheMap.Load(key); ok {
+		element := ele.(*list.Element)
 		node := element.Value.(*node)
 		if node.onHistory {
 			l.historyList.Remove(element)
 		} else {
 			l.cacheList.Remove(element)
 		}
-		delete(l.cacheMap, node.key)
+		l.cacheMap.Delete(node.key)
 		l.currentBytes -= int64(len(node.key)) + int64(node.value.Len())
 		// delete completed, notice deleted event.
 		if l.onLruDelete != nil {
@@ -110,5 +114,5 @@ func (l *lru) moveToCache(element *list.Element) {
 	node := element.Value.(*node)
 	node.onHistory = false
 	ele := l.cacheList.PushBack(node)
-	l.cacheMap[node.key] = ele
+	l.cacheMap.Store(node.key, ele)
 }

@@ -31,8 +31,6 @@ func TestAdd(t *testing.T) {
 	lru.add("key1", &TestValue{v: "cover"})
 	assert.Equal(t, lru.historyList.Len(), 0)
 	assert.Equal(t, lru.cacheList.Len(), 1)
-
-	assert.Equal(t, len(lru.cacheMap), 1)
 }
 
 func TestGet(t *testing.T) {

@@ -1,6 +1,9 @@
 package cache
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 type sweeper struct {
 	isSweeping bool
@@ -8,7 +11,10 @@ type sweeper struct {
 	expireSignal chan bool
 	// sweep interval for expire key.Default value is 5s.
 	expireDuration time.Duration
-	expireMap      map[string]time.Time
+	expireMap      sync.Map
+	// expireMap's length
+	mLength int
+	//expireMap      map[string]time.Time
 	// callback when expire key deleted.
 	onExpireDelete func(key string)
 }
@@ -16,7 +22,6 @@ type sweeper struct {
 func newSweeper(expireDuration time.Duration, onExpireDelete func(key string)) *sweeper {
 	s := &sweeper{
 		isSweeping:     false,
-		expireMap:      make(map[string]time.Time),
 		expireSignal:   make(chan bool),
 		expireDuration: expireDuration,
 		onExpireDelete: onExpireDelete,
@@ -31,7 +36,7 @@ func newSweeper(expireDuration time.Duration, onExpireDelete func(key string)) *
 
 func (s *sweeper) addExpireKey(key string, duration time.Duration) {
 	s.tryStartSweep()
-	s.expireMap[key] = time.Now().Add(duration)
+	s.expireMap.Store(key, time.Now().Add(duration))
 }
 
 func (s *sweeper) tryStartSweep() {
@@ -42,7 +47,7 @@ func (s *sweeper) tryStartSweep() {
 }
 
 func (s *sweeper) tryStopSweep() {
-	if s.isSweeping && len(s.expireMap) == 0 {
+	if s.isSweeping && s.mLength == 0 {
 		s.isSweeping = false
 		s.expireSignal <- false
 	}
@@ -71,35 +76,41 @@ waiting:
 				goto waiting
 			}
 		default:
-			time.Sleep(s.expireDuration)
-			for key, expireTime := range s.expireMap {
+			// recount the expire map length
+			s.mLength = 0
+			s.expireMap.Range(func(key, value interface{}) bool {
+				s.mLength++
 				// if expire time is before now, need delete this key and value in the cache.
-				if expireTime.Before(time.Now()) {
-					s.delete(key)
+				if value.(time.Time).Before(time.Now()) {
+					s.delete(key.(string), true)
+					s.mLength--
 				}
-			}
+				return true
+			})
+
+			time.Sleep(s.expireDuration)
 			s.tryStopSweep()
 		}
 	}
 }
 
-func (s *sweeper) delete(key string) {
-	if _, ok := s.expireMap[key]; ok {
-		delete(s.expireMap, key)
+func (s *sweeper) delete(key string, isCallBack bool) {
+	if _, ok := s.expireMap.Load(key); ok {
+		s.expireMap.Delete(key)
 		s.onExpireDelete(key)
 	}
 }
 
 func (s *sweeper) isExpireKey(key string) bool {
-	if _, ok := s.expireMap[key]; ok {
+	if _, ok := s.expireMap.Load(key); ok {
 		return true
 	}
 	return false
 }
 
 func (s *sweeper) isExpired(key string) bool {
-	if expireTime, ok := s.expireMap[key]; ok {
-		if expireTime.Before(time.Now()) {
+	if expireTime, ok := s.expireMap.Load(key); ok {
+		if expireTime.(time.Time).Before(time.Now()) {
 			return true
 		}
 	}
