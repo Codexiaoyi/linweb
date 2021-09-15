@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"linweb/interfaces"
 	"sync"
 	"time"
 )
@@ -42,7 +41,7 @@ func (c *Cache) SetMaxBytes(maxBytes int64) {
 }
 
 // Get value by key.If the key is expired, return "nil,false".
-func (c *Cache) Get(key string) (value interfaces.Value, ok bool) {
+func (c *Cache) Get(key string) (value interface{}, ok bool) {
 	c.mux.RLock()
 	defer c.mux.RUnlock()
 	// expired
@@ -54,7 +53,7 @@ func (c *Cache) Get(key string) (value interfaces.Value, ok bool) {
 	return c.lru.get(key)
 }
 
-func add(key string, value interfaces.Value) {
+func add(key string, value interface{}) {
 	cache.lru.add(key, value)
 	for cache.maxBytes != 0 && cache.maxBytes < cache.lru.currentBytes {
 		cache.lru.removeOldest()
@@ -62,14 +61,14 @@ func add(key string, value interfaces.Value) {
 }
 
 // Add cache.
-func (c *Cache) Add(key string, value interfaces.Value) {
+func (c *Cache) Add(key string, value interface{}) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	add(key, value)
 }
 
 // Add cache with expire time.
-func (c *Cache) AddWithExpire(key string, value interfaces.Value, expireDuration time.Duration) {
+func (c *Cache) AddWithExpire(key string, value interface{}, expireDuration time.Duration) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	c.sweeper.addExpireKey(key, expireDuration)

@@ -2,16 +2,13 @@ package cache
 
 import (
 	"testing"
+	"unsafe"
 
 	"gopkg.in/go-playground/assert.v1"
 )
 
 type TestValue struct {
 	v string
-}
-
-func (v *TestValue) Len() int {
-	return len(v.v)
 }
 
 func TestAdd(t *testing.T) {
@@ -21,12 +18,12 @@ func TestAdd(t *testing.T) {
 	lru.add("key1", &TestValue{v: "test string...."})
 	assert.Equal(t, lru.historyList.Len(), 1)
 	assert.Equal(t, lru.cacheList.Len(), 0)
-	assert.Equal(t, lru.currentBytes, int64(len("key1"+"test string....")))
+	assert.Equal(t, lru.currentBytes, int64(unsafe.Sizeof("key1")+unsafe.Sizeof("test string....")))
 
 	lru.add("key1", &TestValue{v: "cover"})
 	assert.Equal(t, lru.historyList.Len(), 1)
 	assert.Equal(t, lru.cacheList.Len(), 0)
-	assert.Equal(t, lru.currentBytes, int64(len("key1"+"cover")))
+	assert.Equal(t, lru.currentBytes, int64(unsafe.Sizeof("key1")+unsafe.Sizeof("cover")))
 
 	lru.add("key1", &TestValue{v: "cover"})
 	assert.Equal(t, lru.historyList.Len(), 0)

@@ -2,8 +2,8 @@ package cache
 
 import (
 	"container/list"
-	"linweb/interfaces"
 	"sync"
+	"unsafe"
 )
 
 type lru struct {
@@ -26,7 +26,7 @@ type node struct {
 	onHistory bool
 	count     int8
 	key       string
-	value     interfaces.Value
+	value     interface{}
 }
 
 func newLru(k int8, onLruDelete func(key string)) *lru {
@@ -38,12 +38,12 @@ func newLru(k int8, onLruDelete func(key string)) *lru {
 	}
 }
 
-func (l *lru) add(key string, value interfaces.Value) {
+func (l *lru) add(key string, value interface{}) {
 	// key is exist, update value
 	if ele, ok := l.cacheMap.Load(key); ok {
 		element := ele.(*list.Element)
 		node := element.Value.(*node)
-		l.currentBytes += int64(value.Len()) - int64(node.value.Len())
+		l.currentBytes += int64(unsafe.Sizeof(value)) - int64(unsafe.Sizeof(node.value))
 		node.value = value
 		if node.onHistory {
 			node.count++
@@ -60,11 +60,11 @@ func (l *lru) add(key string, value interfaces.Value) {
 			value:     value,
 		})
 		l.cacheMap.Store(key, element)
-		l.currentBytes += int64(len(key)) + int64(value.Len())
+		l.currentBytes += int64(unsafe.Sizeof(key)) + int64(unsafe.Sizeof(value))
 	}
 }
 
-func (l *lru) get(key string) (interfaces.Value, bool) {
+func (l *lru) get(key string) (interface{}, bool) {
 	if ele, ok := l.cacheMap.Load(key); ok {
 		element := ele.(*list.Element)
 		node := element.Value.(*node)
@@ -91,7 +91,7 @@ func (l *lru) delete(key string) {
 			l.cacheList.Remove(element)
 		}
 		l.cacheMap.Delete(node.key)
-		l.currentBytes -= int64(len(node.key)) + int64(node.value.Len())
+		l.currentBytes -= int64(len(node.key)) + int64(unsafe.Sizeof(node.value))
 		// delete completed, notice deleted event.
 		if l.onLruDelete != nil {
 			l.onLruDelete(node.key)
