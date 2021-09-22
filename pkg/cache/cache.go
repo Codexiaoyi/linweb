@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"linweb/interfaces"
 	"sync"
 	"time"
 )
@@ -19,18 +20,23 @@ type Cache struct {
 	mux      sync.RWMutex
 }
 
+func newCache() *Cache {
+	return &Cache{
+		lru:     newLru(2, onKeyDelete),
+		sweeper: newSweeper(5*time.Second, onKeyDelete),
+	}
+}
+
+func onKeyDelete(key string) {
+	if cache != nil {
+		cache.Delete(key)
+	}
+}
+
 // The cache can only be created once.
-func Instance() *Cache {
+func Instance() interfaces.ICache {
 	cacheOnce.Do(func() {
-		onKeyDelete := func(key string) {
-			if cache != nil {
-				cache.Delete(key)
-			}
-		}
-		cache = &Cache{
-			lru:     newLru(2, onKeyDelete),
-			sweeper: newSweeper(5*time.Second, onKeyDelete),
-		}
+		cache = newCache()
 	})
 	return cache
 }
