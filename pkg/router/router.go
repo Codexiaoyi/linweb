@@ -63,7 +63,7 @@ func (r *Router) getRoute(method MethodType, path string) (*node, map[string]str
 	return nil, nil
 }
 
-func (r *Router) Handle(c interfaces.IContext) {
+func (r *Router) Handle(c interfaces.IContext, i interfaces.IInjector) {
 	n, params := r.getRoute(getMethodType(c.Request().Method()), c.Request().Path())
 	if n != nil {
 		// set the params of url to the context.
@@ -72,6 +72,7 @@ func (r *Router) Handle(c interfaces.IContext) {
 		// map all route function to get the function info.
 		handler := r.handlers[key]
 		if handler != nil {
+			i.Inject(handler.Recv)
 			middlewareFunc := func(c interfaces.IContext) {
 				// call controller's method.
 				if !handler.Dto.IsValid() {

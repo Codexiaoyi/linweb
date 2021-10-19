@@ -3,6 +3,7 @@ package main
 import (
 	"linweb"
 	"linweb/examples/blog/controllers"
+	"linweb/examples/blog/db"
 	"linweb/interfaces"
 	"log"
 )
@@ -10,6 +11,7 @@ import (
 func main() {
 	l := linweb.NewLinWeb()
 	l.AddMiddlewares(PrintHelloMiddleware)
+	l.AddTransient(&db.UserRepository{})
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
 	err := l.Run(":4560")
 	if err != nil {

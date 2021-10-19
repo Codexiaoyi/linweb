@@ -56,11 +56,10 @@ func (ij *Injector) AddTransient(objects ...interface{}) {
 	}
 }
 
-func (ij *Injector) Inject(service interface{}) {
-	if service == nil {
+func (ij *Injector) Inject(value reflect.Value) {
+	if value.IsNil() || !value.IsValid() || value.IsZero() {
 		return
 	}
-	value := reflect.ValueOf(service)
 	if value.Kind() == reflect.Ptr {
 		value = value.Elem()
 	}
@@ -76,9 +75,9 @@ func (ij *Injector) Inject(service interface{}) {
 			} else {
 				result = ij.tc.getObject(field.Type)
 			}
-			if !result.IsNil() || !result.IsValid() || !result.IsZero() {
+			if !result.IsNil() || result.IsValid() || !result.IsZero() {
 				value.Field(i).Set(result)
-				ij.Inject(result.Interface())
+				ij.Inject(result)
 			}
 		}
 	}

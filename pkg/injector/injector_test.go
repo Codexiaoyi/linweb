@@ -1,6 +1,7 @@
 package injector
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -33,10 +34,10 @@ func (suite *InjectorTestSuite) TestAddSingleton() {
 	ts1 := &testService1{}
 	ts2 := &testService2{}
 	suite.injector.AddSingleton(&TestObject{testString: "test string"})
-	suite.injector.Inject(ts1)
+	suite.injector.Inject(reflect.ValueOf(ts1))
 	suite.NotNil(ts1.TI)
 	suite.Equal("test string", ts1.TI.Test())
-	suite.injector.Inject(ts2)
+	suite.injector.Inject(reflect.ValueOf(ts2))
 	suite.NotNil(ts2.TI)
 	suite.Equal("test string", ts2.TI.Test())
 	//ts2 and ts1 use same TI.
@@ -55,10 +56,10 @@ func (suite *InjectorTestSuite) TestAddTransient() {
 	ts1 := &testService1{}
 	ts2 := &testService2{}
 	suite.injector.AddTransient(&TestObject{testString: "test string"})
-	suite.injector.Inject(ts1)
+	suite.injector.Inject(reflect.ValueOf(ts1))
 	suite.NotNil(ts1.TI)
 	suite.Equal("test string", ts1.TI.Test())
-	suite.injector.Inject(ts2)
+	suite.injector.Inject(reflect.ValueOf(ts2))
 	suite.NotNil(ts2.TI)
 	suite.Equal("test string", ts2.TI.Test())
 	//ts2 and ts1 use different TI.

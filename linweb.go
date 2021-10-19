@@ -5,6 +5,7 @@ import (
 	"linweb/interfaces"
 	"linweb/pkg/cache"
 	"linweb/pkg/context"
+	"linweb/pkg/injector"
 	"linweb/pkg/middleware"
 	"linweb/pkg/model"
 	"linweb/pkg/router"
@@ -16,6 +17,7 @@ import (
 
 var (
 	pluginsModel interfaces.IModel
+	inject       interfaces.IInjector
 	Cache        interfaces.ICache
 )
 
@@ -29,6 +31,7 @@ type LinWeb struct {
 	contextPool sync.Pool
 }
 
+// Create a new LinWeb.
 func NewLinWeb() *LinWeb {
 	return &LinWeb{}
 }
@@ -38,6 +41,10 @@ func NewLinWeb() *LinWeb {
 // Without customize plugins will use the default plugins.
 func (lin *LinWeb) AddCustomizePlugins(plugins ...interface{}) {
 	for _, p := range plugins {
+		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.IInjector)(nil)).Elem()) {
+			inject = p.(interfaces.IInjector)
+			continue
+		}
 		if reflect.TypeOf(p).Implements(reflect.TypeOf((*interfaces.ICache)(nil)).Elem()) {
 			Cache = p.(interfaces.ICache)
 			continue
@@ -60,6 +67,22 @@ func (lin *LinWeb) AddCustomizePlugins(plugins ...interface{}) {
 		}
 		log.Fatal(fmt.Sprintf("'%s' is not a plugin, please check if it implements a plugin", reflect.TypeOf(p).Elem().Name()))
 	}
+}
+
+// AddSingleton Add objects to DI container with a single instance in every request, they must all be of pointer type.
+func (lin *LinWeb) AddSingleton(objs ...interface{}) {
+	if inject == nil {
+		inject = injector.Instance()
+	}
+	inject.AddSingleton(objs...)
+}
+
+// AddTransient Add objects to DI container with new instance in every request, they must all be of pointer type.
+func (lin *LinWeb) AddTransient(objs ...interface{}) {
+	if inject == nil {
+		inject = injector.Instance()
+	}
+	inject.AddTransient(objs...)
 }
 
 // AddControllers Add all controllers, they must all be of pointer type
@@ -93,6 +116,7 @@ func (lin *LinWeb) Run(addr string) error {
 	return http.ListenAndServe(addr, lin)
 }
 
+// Serve HTTP.
 func (lin *LinWeb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//create a new middleware to current request
 	middleware := lin.markMiddleware.New(lin.middlewareFunc...)
@@ -100,7 +124,7 @@ func (lin *LinWeb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := lin.contextPool.Get().(interfaces.IContext)
 	ctx.Reset(w, req, middleware)
 
-	lin.router.Handle(ctx)
+	lin.router.Handle(ctx, inject)
 
 	//end handle, take context to pool
 	lin.contextPool.Put(ctx)
