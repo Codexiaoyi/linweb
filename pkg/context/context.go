@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+var _ interfaces.IContext = &Context{}
+
 type Context struct {
 	// origin objects
 	response   interfaces.IResponse

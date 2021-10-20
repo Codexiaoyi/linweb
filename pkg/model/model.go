@@ -7,6 +7,8 @@ import (
 	"github.com/go-playground/validator"
 )
 
+var _ interfaces.IModel = &Model{}
+
 type Model struct {
 	model interface{}
 	err   error

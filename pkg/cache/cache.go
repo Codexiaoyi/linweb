@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+var _ interfaces.ICache = &Cache{}
+
 var (
 	cacheOnce sync.Once
 	cache     *Cache

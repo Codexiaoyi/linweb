@@ -2,6 +2,7 @@ package interfaces
 
 import "net/http"
 
+// IContext Save http request data.
 type IContext interface {
 	// New create an instance
 	New() IContext
@@ -11,7 +12,9 @@ type IContext interface {
 	Request() IRequest
 	// Get http response info.
 	Response() IResponse
+	// Get middleware in context.
 	Middleware() IMiddleware
+	// Next middleware.
 	Next()
 }
 
@@ -21,8 +24,11 @@ type IRequest interface {
 	PostForm(key string) string
 	// Query get query data in url
 	Query(key string) string
+	// Get url path.
 	Path() string
+	// Get http method.
 	Method() string
+	// Get request body.
 	Body() string
 	// SetParams set params in url
 	SetParams(map[string]string)

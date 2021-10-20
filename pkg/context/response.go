@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+var _ interfaces.IResponse = &Response{}
+
 type Response struct {
 	response http.ResponseWriter
 }

@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+var _ interfaces.IRequest = &Request{}
+
 type Request struct {
 	req    *http.Request
 	params map[string]string

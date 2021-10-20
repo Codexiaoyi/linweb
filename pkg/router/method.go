@@ -10,6 +10,9 @@ const (
 	POST
 	PUT
 	DELETE
+	PATCH
+	OPTIONS
+	HEAD
 )
 
 // Get method type by method string.
@@ -23,6 +26,12 @@ func getMethodType(method string) MethodType {
 		return PUT
 	case "DELETE":
 		return DELETE
+	case "PATCH":
+		return PATCH
+	case "OPTIONS":
+		return OPTIONS
+	case "HEAD":
+		return HEAD
 	default:
 		return Unknown
 	}
@@ -39,6 +48,12 @@ func getMethod(t MethodType) string {
 		return "PUT"
 	case DELETE:
 		return "DELETE"
+	case PATCH:
+		return "PATCH"
+	case OPTIONS:
+		return "OPTIONS"
+	case HEAD:
+		return "HEAD"
 	default:
 		return ""
 	}

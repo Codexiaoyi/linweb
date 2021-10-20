@@ -4,6 +4,8 @@ import (
 	"linweb/interfaces"
 )
 
+var _ interfaces.IMiddleware = &Middleware{}
+
 type Middleware struct {
 	funcs []interfaces.HandlerFunc
 	index int

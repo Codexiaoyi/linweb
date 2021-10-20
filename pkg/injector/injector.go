@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+var _ interfaces.IInjector = &Injector{}
+
 type mode int
 
 const (
