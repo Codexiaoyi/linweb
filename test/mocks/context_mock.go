@@ -5,7 +5,7 @@
 package mocks
 
 import (
-	interfaces "linweb/interfaces"
+	interfaces "github.com/Codexiaoyi/linweb/interfaces"
 	http "net/http"
 	reflect "reflect"
 

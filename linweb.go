@@ -1,18 +1,33 @@
+//Copyright 2021 Codexiaoyi
+//
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//
+//	http://www.apache.org/licenses/LICENSE-2.0
+//
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+
 package linweb
 
 import (
 	"fmt"
-	"linweb/interfaces"
-	"linweb/pkg/cache"
-	"linweb/pkg/context"
-	"linweb/pkg/injector"
-	"linweb/pkg/middleware"
-	"linweb/pkg/model"
-	"linweb/pkg/router"
 	"log"
 	"net/http"
 	"reflect"
 	"sync"
+
+	"github.com/Codexiaoyi/linweb/interfaces"
+	"github.com/Codexiaoyi/linweb/pkg/cache"
+	"github.com/Codexiaoyi/linweb/pkg/context"
+	"github.com/Codexiaoyi/linweb/pkg/injector"
+	"github.com/Codexiaoyi/linweb/pkg/middleware"
+	"github.com/Codexiaoyi/linweb/pkg/model"
+	"github.com/Codexiaoyi/linweb/pkg/router"
 )
 
 var (

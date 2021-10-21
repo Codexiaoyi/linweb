@@ -1,4 +1,4 @@
-module linweb
+module github.com/Codexiaoyi/linweb
 
 go 1.15
 
