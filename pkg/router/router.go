@@ -87,7 +87,9 @@ func (r *Router) Handle(c interfaces.IContext, i interfaces.IInjector) {
 		// map all route function to get the function info.
 		handler := r.handlers[key]
 		if handler != nil {
-			i.Inject(handler.Recv)
+			if i != nil {
+				i.Inject(handler.Recv)
+			}
 			middlewareFunc := func(c interfaces.IContext) {
 				// call controller's method.
 				if !handler.Dto.IsValid() {
