@@ -14,6 +14,7 @@
 
 package interfaces
 
+// Router
 type IRouter interface {
 	// Handle the request.
 	Handle(c IContext, i IInjector)

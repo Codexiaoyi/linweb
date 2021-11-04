@@ -26,9 +26,9 @@ import (
 func main() {
 	l := linweb.NewLinWeb()
 	l.AddMiddlewares(PrintHelloMiddleware)
-	l.AddTransient(&db.UserRepository{})
+	l.AddSingleton(&db.UserRepository{})
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
-	err := l.Run(":4560")
+	err := l.Run(":3002")
 	if err != nil {
 		log.Fatalln(err)
 		return
