@@ -24,7 +24,7 @@ import (
 	"gopkg.in/go-playground/assert.v1"
 )
 
-func TestAddCustomizePlugins(t *testing.T) {
+func TestCustomizePlugins(t *testing.T) {
 	// Arrange:mock data
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -42,8 +42,7 @@ func TestAddCustomizePlugins(t *testing.T) {
 	mock_model.EXPECT().ModelError().Return(errors.New("test_mock_model error"))
 
 	//Act
-	linweb := NewLinWeb()
-	linweb.AddCustomizePlugins(mock_context, mock_model)
+	linweb := NewLinWeb(ContextPlugin(mock_context), ModelPlugin(mock_model))
 	ctx := linweb.markContext.New()
 	ctx.Reset(nil, nil, nil)
 
