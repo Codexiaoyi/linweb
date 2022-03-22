@@ -15,8 +15,9 @@
 package context
 
 import (
-	"github.com/Codexiaoyi/linweb/interfaces"
 	"net/http"
+
+	"github.com/Codexiaoyi/linweb/interfaces"
 )
 
 var _ interfaces.IContext = &Context{}
@@ -28,7 +29,7 @@ type Context struct {
 	middleware interfaces.IMiddleware
 }
 
-func (c *Context) New() interfaces.IContext {
+func (c *Context) Clone() interfaces.IContext {
 	return &Context{}
 }
 

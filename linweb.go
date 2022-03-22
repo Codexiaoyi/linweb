@@ -76,16 +76,18 @@ func (lin *LinWeb) AddMiddlewares(middlewareFunc ...interfaces.HandlerFunc) {
 // Run you project to listen the "addr", enjoy yourself!
 func (lin *LinWeb) Run(addr string) error {
 	lin.contextPool.New = func() interface{} {
-		//create a new context for current request
-		return lin.markContext.New()
+		//clone a new context for current request
+		return lin.markContext.Clone()
 	}
 	return http.ListenAndServe(addr, lin)
 }
 
 // Serve HTTP.
 func (lin *LinWeb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	//create a new middleware to current request
-	middleware := lin.markMiddleware.New(lin.middlewareFunc...)
+	//clone a new middleware to current request
+	middleware := lin.markMiddleware.Clone()
+	//add user middlewares
+	middleware.AddMiddlewares(lin.middlewareFunc...)
 	// get a context from pool
 	ctx := lin.contextPool.Get().(interfaces.IContext)
 	ctx.Reset(w, req, middleware)

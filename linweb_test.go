@@ -34,7 +34,7 @@ func TestCustomizePlugins(t *testing.T) {
 	// mock a new context instance
 	mock_context := mocks.NewMockIContext(ctrl)
 	mock_context.EXPECT().Request().Return(mock_request)
-	mock_context.EXPECT().New().Return(mock_context)
+	mock_context.EXPECT().Clone().Return(mock_context)
 	mock_context.EXPECT().Reset(gomock.Nil(), gomock.Nil(), gomock.Nil())
 	// mock model
 	mock_model := mocks.NewMockIModel(ctrl)
@@ -43,7 +43,7 @@ func TestCustomizePlugins(t *testing.T) {
 
 	//Act
 	linweb := NewLinWeb(ContextPlugin(mock_context), ModelPlugin(mock_model))
-	ctx := linweb.markContext.New()
+	ctx := linweb.markContext.Clone()
 	ctx.Reset(nil, nil, nil)
 
 	//Assert

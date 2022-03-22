@@ -18,8 +18,8 @@ import "net/http"
 
 // IContext Save http request data.
 type IContext interface {
-	// New create an instance
-	New() IContext
+	// Clone an IContext
+	Clone() IContext
 	// Injecting dependencies and reset this Context. In order to use sync.Pool to reuse Context.
 	Reset(http.ResponseWriter, *http.Request, IMiddleware)
 	// Get http request info.

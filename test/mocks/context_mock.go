@@ -5,10 +5,10 @@
 package mocks
 
 import (
-	interfaces "github.com/Codexiaoyi/linweb/interfaces"
 	http "net/http"
 	reflect "reflect"
 
+	interfaces "github.com/Codexiaoyi/linweb/interfaces"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -35,6 +35,20 @@ func (m *MockIContext) EXPECT() *MockIContextMockRecorder {
 	return m.recorder
 }
 
+// Clone mocks base method.
+func (m *MockIContext) Clone() interfaces.IContext {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Clone")
+	ret0, _ := ret[0].(interfaces.IContext)
+	return ret0
+}
+
+// Clone indicates an expected call of Clone.
+func (mr *MockIContextMockRecorder) Clone() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Clone", reflect.TypeOf((*MockIContext)(nil).Clone))
+}
+
 // Middleware mocks base method.
 func (m *MockIContext) Middleware() interfaces.IMiddleware {
 	m.ctrl.T.Helper()
@@ -47,20 +61,6 @@ func (m *MockIContext) Middleware() interfaces.IMiddleware {
 func (mr *MockIContextMockRecorder) Middleware() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Middleware", reflect.TypeOf((*MockIContext)(nil).Middleware))
-}
-
-// New mocks base method.
-func (m *MockIContext) New() interfaces.IContext {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "New")
-	ret0, _ := ret[0].(interfaces.IContext)
-	return ret0
-}
-
-// New indicates an expected call of New.
-func (mr *MockIContextMockRecorder) New() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "New", reflect.TypeOf((*MockIContext)(nil).New))
 }
 
 // Next mocks base method.

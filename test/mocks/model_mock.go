@@ -5,9 +5,9 @@
 package mocks
 
 import (
-	interfaces "github.com/Codexiaoyi/linweb/interfaces"
 	reflect "reflect"
 
+	interfaces "github.com/Codexiaoyi/linweb/interfaces"
 	gomock "github.com/golang/mock/gomock"
 )
 

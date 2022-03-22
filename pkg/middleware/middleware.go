@@ -25,9 +25,9 @@ type Middleware struct {
 	index int
 }
 
-func (m *Middleware) New(middlewareFunc ...interfaces.HandlerFunc) interfaces.IMiddleware {
+func (m *Middleware) Clone() interfaces.IMiddleware {
 	return &Middleware{
-		funcs: middlewareFunc,
+		funcs: make([]interfaces.HandlerFunc, 0),
 		index: -1,
 	}
 }
