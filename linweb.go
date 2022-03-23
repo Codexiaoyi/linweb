@@ -27,7 +27,7 @@ var (
 	Cache        interfaces.ICache
 )
 
-type LinWeb struct {
+type Linweb struct {
 	markRouter  interfaces.IRouter
 	markContext interfaces.IContext
 	// this middleware means an implement, every request need create a new middleware from New() by markMiddleware.
@@ -40,10 +40,10 @@ type LinWeb struct {
 	contextPool sync.Pool
 }
 
-// Create a new LinWeb.
+// Create a new Linweb.
 // Add customize plugins with method of plugins.go, otherwise use default plugins.
-func NewLinWeb(plugins ...CustomizePlugins) *LinWeb {
-	lin := &LinWeb{}
+func NewLinweb(plugins ...CustomizePlugins) *Linweb {
+	lin := &Linweb{}
 	defaultPlugins()(lin)
 	for _, plugin := range plugins {
 		plugin(lin)
@@ -54,27 +54,27 @@ func NewLinWeb(plugins ...CustomizePlugins) *LinWeb {
 }
 
 // AddSingleton Add objects to DI container with a single instance in every request, they must all be of pointer type.
-func (lin *LinWeb) AddSingleton(objs ...interface{}) {
+func (lin *Linweb) AddSingleton(objs ...interface{}) {
 	lin.markInject.AddSingleton(objs...)
 }
 
 // AddTransient Add objects to DI container with new instance in every request, they must all be of pointer type.
-func (lin *LinWeb) AddTransient(objs ...interface{}) {
+func (lin *Linweb) AddTransient(objs ...interface{}) {
 	lin.markInject.AddTransient(objs...)
 }
 
 // AddControllers Add all controllers, they must all be of pointer type
-func (lin *LinWeb) AddControllers(obj ...interface{}) {
+func (lin *Linweb) AddControllers(obj ...interface{}) {
 	lin.markRouter.AddControllers(obj)
 }
 
 // AddMiddlewares Add global middlewares
-func (lin *LinWeb) AddMiddlewares(middlewareFunc ...interfaces.HandlerFunc) {
+func (lin *Linweb) AddMiddlewares(middlewareFunc ...interfaces.HandlerFunc) {
 	lin.middlewareFunc = middlewareFunc
 }
 
 // Run you project to listen the "addr", enjoy yourself!
-func (lin *LinWeb) Run(addr string) error {
+func (lin *Linweb) Run(addr string) error {
 	lin.contextPool.New = func() interface{} {
 		//clone a new context for current request
 		return lin.markContext.Clone()
@@ -83,7 +83,7 @@ func (lin *LinWeb) Run(addr string) error {
 }
 
 // Serve HTTP.
-func (lin *LinWeb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (lin *Linweb) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//clone a new middleware to current request
 	middleware := lin.markMiddleware.Clone()
 	//add user middlewares

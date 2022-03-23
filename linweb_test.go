@@ -42,7 +42,7 @@ func TestCustomizePlugins(t *testing.T) {
 	mock_model.EXPECT().ModelError().Return(errors.New("test_mock_model error"))
 
 	//Act
-	linweb := NewLinWeb(ContextPlugin(mock_context), ModelPlugin(mock_model))
+	linweb := NewLinweb(ContextPlugin(mock_context), ModelPlugin(mock_model))
 	ctx := linweb.markContext.Clone()
 	ctx.Reset(nil, nil, nil)
 

@@ -27,10 +27,10 @@ import (
 // CustomizePlugins Add customize plugins.
 // It is not allowed to pass in non-plugin implementations.
 // Without customize plugins will use the default plugins.
-type CustomizePlugins func(lin *LinWeb)
+type CustomizePlugins func(lin *Linweb)
 
 func defaultPlugins() CustomizePlugins {
-	return func(lin *LinWeb) {
+	return func(lin *Linweb) {
 		lin.markRouter = router.New()
 		lin.markContext = &context.Context{}
 		lin.markMiddleware = &middleware.Middleware{}
@@ -42,42 +42,42 @@ func defaultPlugins() CustomizePlugins {
 
 // Customize router plugin.
 func RouterPlugin(router interfaces.IRouter) CustomizePlugins {
-	return func(lin *LinWeb) {
+	return func(lin *Linweb) {
 		lin.markRouter = router
 	}
 }
 
 // Customize context plugin.
 func ContextPlugin(context interfaces.IContext) CustomizePlugins {
-	return func(lin *LinWeb) {
+	return func(lin *Linweb) {
 		lin.markContext = context
 	}
 }
 
 // Customize middleware plugin.
 func MiddlewarePlugin(middleware interfaces.IMiddleware) CustomizePlugins {
-	return func(lin *LinWeb) {
+	return func(lin *Linweb) {
 		lin.markMiddleware = middleware
 	}
 }
 
 // Customize inject plugin.
 func InjectPlugin(inject interfaces.IInjector) CustomizePlugins {
-	return func(lin *LinWeb) {
+	return func(lin *Linweb) {
 		lin.markInject = inject
 	}
 }
 
 // Customize cache plugin.
 func CachePlugin(cache interfaces.ICache) CustomizePlugins {
-	return func(lin *LinWeb) {
+	return func(lin *Linweb) {
 		lin.markCache = cache
 	}
 }
 
 // Customize model plugin.
 func ModelPlugin(model interfaces.IModel) CustomizePlugins {
-	return func(lin *LinWeb) {
+	return func(lin *Linweb) {
 		lin.markModel = model
 	}
 }

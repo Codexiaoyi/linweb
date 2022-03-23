@@ -8,9 +8,9 @@
 
 ## 接口即文档
 
-插件接口都**在/interfaces文件目录下**并有尽量详细的注释，你只需要查看interfaces目录下的文件接口就可以了解到linWeb的功能。
+插件接口都**在/interfaces文件目录下**并有尽量详细的注释，你只需要查看interfaces目录下的文件接口就可以了解到linweb的功能。
 
-linWeb目前实现了请求上下文（context）、动态路由（router）、中间件（middleware）、模型验证与模型映射（model --- validate、map）等，其中部分实现参考了 [极客兔兔的七天实现Web框架](https://github.com/geektutu/7days-golang) 。待开发功能及工作可在[Roadmap](https://github.com/Codexiaoyi/linweb/issues/1)中查看，欢迎建议、issue、pr和star~
+linweb目前实现了请求上下文（context）、动态路由（router）、中间件（middleware）、模型验证与模型映射（model --- validate、map）等，其中部分实现参考了 [极客兔兔的七天实现Web框架](https://github.com/geektutu/7days-golang) 。待开发功能及工作可在[Roadmap](https://github.com/Codexiaoyi/linweb/issues/1)中查看，欢迎建议、issue、pr和star~
 
 ###### PS：目前该项目仅作为玩具，接受大佬建议并完善，不喜勿喷。
 
@@ -18,26 +18,26 @@ linWeb目前实现了请求上下文（context）、动态路由（router）、�
 
 ## 面向接口编程
 
-在linWeb中，将完全面向接口编程并将可扩展部分插件化。
+在linweb中，将完全面向接口编程并将可扩展部分插件化。
 
-linWeb提供一套插件接口及默认实现，你也可以通过***AddCustomizePlugins***方法添加自定义实现。
+linweb提供一套插件接口及默认实现，你也可以通过***AddCustomizePlugins***方法添加自定义实现。
 
 <img src=".\docs\images\structure.png" alt="image-20210727102845643" style="zoom:80%;" />
 
 
 
-## 如何使用linWeb？
+## 如何使用linweb？
 
 > ###### 详细示例都在examples目录下
 
 - ### Run
 
 
-使用NewLinWeb方法创建一个linWeb，调用Run方法就可以运行一个没有任何api的web项目。
+使用NewLinweb方法创建一个linweb，调用Run方法就可以运行一个没有任何api的web项目。
 
 ```go
 func main() {
-	l := linWeb.NewLinWeb()
+	l := linweb.NewLinweb()
 	l.Run(":9999")
 }
 ```
@@ -45,7 +45,7 @@ func main() {
 - ### Controller
 
 
-linWeb将面向Controller定义api接口。
+linweb将面向Controller定义api接口。
 
 #### 1.你需要在根目录下建立/controllers目录（待优化，目前是必须需要在controllers目录下）
 
@@ -55,9 +55,9 @@ linWeb将面向Controller定义api接口。
 
 ①需要在controller方法的注释中**添加注解，标识HTTP方法和路由路径**。如果没有，将不作为一个http请求接口。
 
-②**方法的第一个参数必须为IContext**，linWeb将自动实例化，Context中保存request及response的信息。
+②**方法的第一个参数必须为IContext**，linweb将自动实例化，Context中保存request及response的信息。
 
-③如果存在dto入参，linWeb将自动解析request.body的json字符串，并将其转化为dto实例。
+③如果存在dto入参，linweb将自动解析request.body的json字符串，并将其转化为dto实例。
 
 ```go
 type LoginDto struct {
@@ -70,7 +70,7 @@ type UserController struct {
 
 //[GET("/hello")]
 func (user *UserController) Hello(c interfaces.IContext) {
-	c.Response().HTML(http.StatusOK, "<h1>Hello linWeb</h1>")
+	c.Response().HTML(http.StatusOK, "<h1>Hello linweb</h1>")
 }
 
 //[POST("/login")]
@@ -85,7 +85,7 @@ func (user *UserController) Login(c interfaces.IContext, dto LoginDto) {
 
 ```go
 func main() {
-	l := linWeb.NewLinWeb()
+	l := linweb.NewLinweb()
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
 	l.Run(":9999")
 }
@@ -113,16 +113,16 @@ func (blog *BlogController) GetBlog(c interfaces.IContext) {
 
 ```go
 func main() {
-	l := linWeb.NewLinWeb()
+	l := linweb.NewLinweb()
 	l.AddMiddlewares(PrintHelloMiddleware)
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
 	l.Run(":9999")
 }
 
 func PrintHelloMiddleware(c interfaces.IContext) {
-	fmt.Println("hello linWeb!")
+	fmt.Println("hello linweb!")
 	c.Next()
-	fmt.Println("byebye linWeb")
+	fmt.Println("byebye linweb")
 }
 ```
 
@@ -132,7 +132,7 @@ func PrintHelloMiddleware(c interfaces.IContext) {
 
 ```go
 func main() {
-	l := linWeb.NewLinWeb()
+	l := linweb.NewLinweb()
 	l.AddCustomizePlugins(&CustomizeModel{},&CustomizeRouter{})
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
 	l.Run(":9999")

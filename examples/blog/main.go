@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	l := linweb.NewLinWeb()
+	l := linweb.NewLinweb()
 	l.AddMiddlewares(PrintHelloMiddleware)
 	l.AddSingleton(&db.UserRepository{})
 	l.AddControllers(&controllers.UserController{}, &controllers.BlogController{})
