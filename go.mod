@@ -10,8 +10,5 @@ require (
 	github.com/huandu/go-clone v1.3.0
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
-	golang.org/x/tools v0.1.10 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1
-	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 )

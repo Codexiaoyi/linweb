@@ -13,3 +13,41 @@
 //limitations under the License.
 
 package router
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestAnnotateComment(t *testing.T) {
+	// post,"aaa"
+	comment := "[POST(\"aaa\")]"
+	resType, resString := annotateComment(comment)
+	assert.Equal(t, POST, resType)
+	assert.Equal(t, "aaa", resString)
+
+	// unknown MethodType, Result => unknown,"aaa"
+	comment = "[POS(\"aaa\")]"
+	resType, resString = annotateComment(comment)
+	assert.Equal(t, Unknown, resType)
+	assert.Equal(t, "aaa", resString)
+
+	// not start with '[', Result => post,"aaa"
+	comment = "#[POST(\"aaa\")]"
+	resType, resString = annotateComment(comment)
+	assert.Equal(t, POST, resType)
+	assert.Equal(t, "aaa", resString)
+
+	// not exist '(' or ')', Result => unknown,""
+	comment = "[POST\"aaa\"]"
+	resType, resString = annotateComment(comment)
+	assert.Equal(t, Unknown, resType)
+	assert.Equal(t, "", resString)
+
+	// not exist '[' or ']', Result => unknown,""
+	comment = "POST(\"aaa\")"
+	resType, resString = annotateComment(comment)
+	assert.Equal(t, Unknown, resType)
+	assert.Equal(t, "", resString)
+}
