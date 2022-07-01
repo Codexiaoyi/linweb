@@ -43,6 +43,8 @@ func (n *node) getAllChildren(part string) []*node {
 }
 
 func (n *node) insert(url string, parts []string, height int) {
+	// if has prefix '*', it is endpoint.
+	// like "/xxx/*yyy/zzz" can cover "/xxx/*xxx/xxx" or "/xxx/*yyy/xxx"
 	if len(parts) == height || strings.HasPrefix(n.part, "*") {
 		n.url = url
 		return

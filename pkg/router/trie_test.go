@@ -54,7 +54,13 @@ func TestSearch(t *testing.T) {
 	node.insert("/get/:name/myfile/ok", parts1, 0)
 	node.insert("/get/:name/*filepath/ok", parts, 0)
 
-	gp := []string{"get", "linweb", "myfile", "aa"}
-	res := node.search(gp, 0)
-	assert.Equal(t, "/get/:name/*filepath/ok", res.url)
+	gp_ok := []string{"get", "linweb", "myfile", "ok"}
+	assert.Equal(t, "/get/:name/myfile/ok", node.search(gp_ok, 0).url)
+
+	gp_any := []string{"get", "linweb", "myfile", "any"}
+	assert.Equal(t, "/get/:name/*filepath/ok", node.search(gp_any, 0).url)
+
+	// "/get/:name/*filepath/aa" cover "/get/:name/*filepath/ok"
+	node.insert("/get/:name/*filepath/aa", parts, 0)
+	assert.Equal(t, "/get/:name/*filepath/aa", node.search(gp_any, 0).url)
 }
