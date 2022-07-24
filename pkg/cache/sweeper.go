@@ -111,7 +111,9 @@ waiting:
 func (s *sweeper) delete(key string, isCallBack bool) {
 	if _, ok := s.expireMap.Load(key); ok {
 		s.expireMap.Delete(key)
-		s.onExpireDelete(key)
+		if isCallBack {
+			s.onExpireDelete(key)
+		}
 	}
 }
 
